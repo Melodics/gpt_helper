@@ -7,7 +7,8 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
-from utils import config
+# Use config_secrets_manager or config_ssm to switch between Secrets Manager or SSM
+from utils import config_secrets_manager as config
 
 log = logging.getLogger()
 
