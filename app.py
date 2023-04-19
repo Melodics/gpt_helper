@@ -111,7 +111,7 @@ def handle_message(say, event):
 
 
 app.event("app_mention")(ack=respond_to_slack_within_3_seconds, lazy=[handle_message])
-app.event("message")(ack=respond_to_slack_within_3_seconds, lazy=[handle_message])
+# app.event("message")(ack=respond_to_slack_within_3_seconds, lazy=[handle_message])
     
 
 if __name__ == "__main__":
