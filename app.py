@@ -15,6 +15,8 @@ id_gpt_helper_demo = ''#'C054CSCDPCG'
 id_engineering_off_topic = 'C01CK9GUT2Q'
 allowlist_channel_ids = [id_gpt_helper_demo, id_engineering_off_topic]
 
+codachat_app_id = 'A053FV4TQCW'
+
 log = logging.getLogger()
 
 chatUrl = "https://api.openai.com/v1/chat/completions"
@@ -47,6 +49,8 @@ def get_image_for_message(message):
             print("Error getting image contents: {}".format(e))
     return None
 
+def _message_is_from_codachat(thread_message):
+    return thread_message.get('app_id') ==  codachat_app_id
 
 def handle_message(say, event):
     channel = event["channel"]
@@ -69,12 +73,14 @@ def handle_message(say, event):
         # Extract messages text
         thread_messages = []
         for thread_message in thread["messages"]:
-            actor = "user" if thread_message.get("is_bot", False) else "assistant"
+            print(f'DEBUG: thread_message is {thread_message}')
+            actor = "assistant" if _message_is_from_codachat(thread_message) else "user"
             message = thread_message["text"]
             image = get_image_for_message(thread_message)
             if image:
                 message = [message, image]
             thread_messages.append(("user", message))
+            thread_messages.append((actor, message))
     else:
         message = event["text"]
         image = get_image_for_message(thread_message)
