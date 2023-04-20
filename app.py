@@ -10,6 +10,11 @@ from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 # Use config_secrets_manager or config_ssm to switch between Secrets Manager or SSM
 from utils import config_secrets_manager as config
 
+# Channel IDs
+id_gpt_helper_demo = ''#'C054CSCDPCG'
+id_engineering_off_topic = 'C01CK9GUT2Q'
+allowlist_channel_ids = [id_gpt_helper_demo, id_engineering_off_topic]
+
 log = logging.getLogger()
 
 chatUrl = "https://api.openai.com/v1/chat/completions"
@@ -42,7 +47,11 @@ def get_image_for_message(message):
 def handle_message(say, event):
     channel = event["channel"]
     thread_ts = event.get("thread_ts", event.get("ts"))
-    # Use the following values as default so that the highest probability words are selected, 
+
+    if channel not in allowlist_channel_ids:
+        say("Sorry, GPTHelper is currently in a beta rollout at Melodics and has not been enabled on this channel. Try asking on one of the currently supported channels.", thread_ts=thread_ts)
+        return
+    # Use the following values as default so that the highest probability words are selected,
     # more repetitive "safe" text responses are used
     temperature = 0
     top_p = 1
