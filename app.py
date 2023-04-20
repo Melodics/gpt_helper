@@ -23,6 +23,10 @@ chatUrl = "https://api.openai.com/v1/chat/completions"
 app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing_secret=config["SLACK_SIGNING_SECRET"])
 
 
+@app.event("message")
+def handle_message_events(body, logger):
+    logger.info(body)
+
 def respond_to_slack_within_3_seconds(body, ack):
     ack(f"Accepted!")
 
