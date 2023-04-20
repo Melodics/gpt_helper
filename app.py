@@ -136,7 +136,12 @@ def handle_message(say, event):
 
         say(response, thread_ts=thread_ts)
     except Exception as e:
-        say("Something went wrong! {}".format(str(e)), thread_ts=thread_ts)
+        if response.status_code == 400:
+            # https://community.openai.com/t/error-retrieving-completions-400-bad-request/34004
+            say(f"Sorry, I'm unable to provide an answer.\nThe number of messages in this particular thread exceeds what I am capable of processing using `{gpt_model}`!",
+                thread_ts=thread_ts)
+        else:
+            say(f"Something went wrong! {str(e)}", thread_ts=thread_ts)
 
 
 app.event("app_mention")(ack=respond_to_slack_within_3_seconds, lazy=[handle_message])
