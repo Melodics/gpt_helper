@@ -42,6 +42,10 @@ def get_image_for_message(message):
 def handle_message(say, event):
     channel = event["channel"]
     thread_ts = event.get("thread_ts", event.get("ts"))
+    # Use the following values as default so that the highest probability words are selected, 
+    # more repetitive "safe" text responses are used
+    temperature = 0
+    top_p = 1
 
     if thread_ts:
         thread = app.client.conversations_replies(
@@ -70,8 +74,13 @@ def handle_message(say, event):
     gpt_model = "gpt-3.5-turbo"
 
     if "(be special)" in event["text"]:
-        thinking_message = "Thinking in 4D..."
+        thinking_message = "Thinking using GPT-4..."
         gpt_model = "gpt-4"
+
+    if "(be creative)" in event["text"]:
+        thinking_message = "Thinking creatively..."
+        temperature = 1
+        top_p = 0
 
     api_key = config["GPT_KEY"]
 
@@ -89,7 +98,8 @@ def handle_message(say, event):
     data = {
         "model": gpt_model,
         "messages": messages,
-        "temperature": 0,
+        "temperature": temperature,
+        "top_p": top_p,
         "max_tokens": 1000,
     }
 
