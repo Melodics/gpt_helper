@@ -3,7 +3,7 @@ import json
 import requests
 import logging
 import base64
-from slack_bolt import App
+from slack_bolt import App, Say
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
@@ -11,7 +11,7 @@ from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from utils import config_secrets_manager as config
 
 # Channel IDs
-id_gpt_helper_demo = ''#'C054CSCDPCG'
+id_gpt_helper_demo = 'C054CSCDPCG'
 id_engineering_off_topic = 'C01CK9GUT2Q'
 allowlist_channel_ids = [id_gpt_helper_demo, id_engineering_off_topic]
 
@@ -52,13 +52,15 @@ def get_image_for_message(message):
 def _message_is_from_codachat(thread_message):
     return thread_message.get('app_id') ==  codachat_app_id
 
-def handle_message(say, event):
-    channel = event["channel"]
-    thread_ts = event.get("thread_ts", event.get("ts"))
+def answer_query(say, channel, thread_ts, query):
+    """
 
-    if channel not in allowlist_channel_ids:
-        say("Sorry, GPTHelper is currently in a beta rollout at Melodics and has not been enabled on this channel. Try asking on one of the currently supported channels.", thread_ts=thread_ts)
-        return
+    @param say:
+    @param channel:
+    @param thread_ts:
+    @param query:
+    @return:
+    """
     # Use the following values as default so that the highest probability words are selected,
     # more repetitive "safe" text responses are used
     temperature = 0
@@ -76,27 +78,19 @@ def handle_message(say, event):
             print(f'DEBUG: thread_message is {thread_message}')
             actor = "assistant" if _message_is_from_codachat(thread_message) else "user"
             message = thread_message["text"]
-            image = get_image_for_message(thread_message)
-            if image:
-                message = [message, image]
-            thread_messages.append(("user", message))
             thread_messages.append((actor, message))
     else:
-        message = event["text"]
-        image = get_image_for_message(thread_message)
-        if image:
-            message = [message, image]
-        thread_messages = [("user", message)]
+        thread_messages = [("user", query)]
 
     print("thread_messages", json.dumps(thread_messages))
     thinking_message = "Thinking..."
     gpt_model = "gpt-3.5-turbo"
 
-    if "(be special)" in event["text"]:
+    if "(be special)" in query:
         thinking_message = "Thinking using GPT-4..."
         gpt_model = "gpt-4"
 
-    if "(be creative)" in event["text"]:
+    if "(be creative)" in query:
         thinking_message = "Thinking creatively..."
         temperature = 1
         top_p = 0
@@ -127,29 +121,93 @@ def handle_message(say, event):
 
     try:
         response = requests.post(chatUrl, headers=headers, data=json.dumps(data))
-
         if response.status_code != 200:
             raise Exception("OpenAI API error: {}".format(response.text))
-
-    
         data = response.json()
         response = data["choices"][0]["message"]["content"]
-
-        app.client.chat_delete(channel=channel, ts=thinking_message["ts"])
-
         say(response, thread_ts=thread_ts)
     except Exception as e:
         if response.status_code == 400:
             # https://community.openai.com/t/error-retrieving-completions-400-bad-request/34004
-            say(f"Sorry, I'm unable to provide an answer.\nThe number of messages in this particular thread exceeds what I am capable of processing using `{gpt_model}`!",
+            say(f"( • ᴖ • ｡ )\nSorry, I'm unable to provide any further answers in this thread.\nThe number of messages in this particular thread exceeds what I am capable of processing using `{gpt_model}`!",
                 thread_ts=thread_ts)
         else:
-            say(f"Something went wrong! {str(e)}", thread_ts=thread_ts)
+            say(f"(╥ᆺ╥；)\nSomething went wrong! {str(e)}", thread_ts=thread_ts)
+
+    app.client.chat_delete(channel=channel, ts=thinking_message["ts"])
 
 
-app.event("app_mention")(ack=respond_to_slack_within_3_seconds, lazy=[handle_message])
-# app.event("message")(ack=respond_to_slack_within_3_seconds, lazy=[handle_message])
-    
+@app.event("app_mention")
+def handle_app_mention_events(event, say: Say):
+    channel = event["channel"]
+    thread_ts = event.get("thread_ts", event.get("ts"))
+
+    if channel not in allowlist_channel_ids:
+        say("Sorry, CodaChat is currently in a beta and has not been enabled on this channel. Try asking on one of the currently supported channels.",
+            thread_ts=thread_ts)
+        return
+
+    prompt_id = say(
+        channel=channel,
+        text=f"Are you sure you want to proceed with asking {event['text']}",
+        thread_ts=thread_ts,
+        # See https://app.slack.com/block-kit-builder/ for use of blocks
+        blocks=[
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Before I reply, please click *Yeah* to confirm the contents of this Slack thread comply with the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
+                }
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": f"Yeah",
+                        },
+                        "value": f"{event['text']}",
+                        "action_id": "confirm_button",
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Yeah, nah",
+                        },
+                        "value": "no",
+                        "action_id": "cancel_button"
+                    }
+                ]
+            }
+        ]
+    )
+    print(f"DEBUG: prompt_id is {prompt_id}")
+
+
+@app.action("confirm_button")
+def handle_confirm_button(ack, body, logger, payload, say):
+    ack()
+    logger.info(body)
+    print(f'DEBUG: The body is: {body}')
+    print(f'DEBUG: The payload is: {payload}')
+    app.client.chat_delete(channel=body['channel']['id'], ts=body['message']['ts'])  # Delete the prompt confirmation dialog
+    answer_query(say=say, channel=body['channel']['id'], thread_ts=body['message']['thread_ts'], query=payload['value'])
+
+
+@app.action("cancel_button")
+def handle_cancel_button(ack, body, say):
+    ack()
+    cancel_confirm = say("Your honesty knows no bounds 𖤣.𖥧.𖡼.⚘",  thread_ts=body['message']['thread_ts'])
+    app.client.chat_delete(channel=body['channel']['id'], ts=body['message']['ts'])  # Delete the prompt confirmation dialog
+    import time
+    time.sleep(2)  # Allow enough time to display cancel_confirm message
+    app.client.chat_delete(channel=body['channel']['id'], ts=cancel_confirm['ts'])
+    return
+
 
 if __name__ == "__main__":
     SocketModeHandler(app, config["SLACK_APP_TOKEN"]).start()
