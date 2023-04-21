@@ -105,6 +105,9 @@ def handle_message(say, event):
 
     system_prompt = """You are a helpful assistant that responds to existing conversations when asked. You are provided with the entire thread of conversation."""
 
+    if "(be poetic)" in query:
+        system_prompt = system_prompt + "Respond in the style of Robert Frost"
+
     thinking_message = say(thinking_message, thread_ts=thread_ts)
 
     messages = [
