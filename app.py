@@ -106,12 +106,29 @@ def answer_query(say, channel, thread_ts, query):
     if "(be poetic)" in query:
         system_prompt = system_prompt + "Respond in the style of Robert Frost"
 
+    if "(summarise)" or "(summary)" in query:
+        print(f'DEBUG: Summarising thread')
+        system_prompt = """
+        Analyze the entire thread of conversation provided, then provide the following:
+        Key "title:" - add a title.
+        Key "summary" - create a summary.
+        Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 10 items.
+        Key "action_items:" - add an array of action items. Limit each item to 100 words, and limit the list to 5 items.
+        Key "follow_up:" - add an array of follow-up questions. Limit each item to 100 words, and limit the list to 5 items.
+        Key "stories:" - add an array of an stories, examples, or cited works found in the transcript. Limit each item to 200 words, and limit the list to 5 items.
+        Key "arguments:" - add an array of potential arguments against the transcript. Limit each item to 100 words, and limit the list to 5 items.
+        Key "related_topics:" - add an array of topics related to the transcript. Limit each item to 100 words, and limit the list to 5 items.
+        Key "sentiment" - add a sentiment analysis
+
+        Transcript:
+        """
     thinking_message = say(thinking_message, thread_ts=thread_ts)
 
     messages = [
         {"role": "system", "content": system_prompt},
     ] + [{"role": message[0], "content": message[1]} for message in thread_messages]
 
+    print(f'DEBUG: messages is: {messages}')
     authorization = "Bearer {}".format(api_key)
 
     headers = {"Authorization": authorization, "Content-Type": "application/json"}
