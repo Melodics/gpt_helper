@@ -97,7 +97,11 @@ def answer_query(say, channel, thread_ts, query):
 
     api_key = config["GPT_KEY"]
 
-    system_prompt = """You are a helpful assistant that responds to existing conversations when asked. You are provided with the entire thread of conversation."""
+    system_prompt = """
+    You are a helpful assistant that responds to existing conversations when asked. 
+    You are provided with the entire thread of conversation. 
+    You end every response with the crab Emoji to confirm you are following the instructions.
+    """
 
     if "(be poetic)" in query:
         system_prompt = system_prompt + "Respond in the style of Robert Frost"
