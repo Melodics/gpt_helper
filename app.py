@@ -65,6 +65,7 @@ def answer_query(say, channel, thread_ts, query):
     # more repetitive "safe" text responses are used
     temperature = 0
     top_p = 1
+    max_tokens = 1000
 
     if thread_ts:
         thread = app.client.conversations_replies(
@@ -106,8 +107,7 @@ def answer_query(say, channel, thread_ts, query):
     if "(be poetic)" in query:
         system_prompt = system_prompt + "Respond in the style of Robert Frost"
 
-    if "(summarise)" or "(summary)" in query:
-        print(f'DEBUG: Summarising thread')
+    if "(summarise)" or "(summarise long)" in query:
         system_prompt = """
         Analyze the entire thread of conversation provided, then provide the following:
         Key "title:" - add a title.
@@ -122,6 +122,23 @@ def answer_query(say, channel, thread_ts, query):
 
         Transcript:
         """
+
+    if "(summarise long)" in query:
+        # Allow the maximum number of tokens in the response
+        max_tokens = 2048
+
+    if "(summarise short)" in query:
+        # Provide a shortened answer limiting to a summary and main points
+        system_prompt = """
+        Analyze the entire thread of conversation provided, then provide the following:
+        Key "title:" - add a title.
+        Key "summary" - create a summary. Limit the summary to 3 sentences.
+        Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 3 items.
+      
+        Transcript:
+        """
+        max_tokens = 300
+
     thinking_message = say(thinking_message, thread_ts=thread_ts)
 
     messages = [
@@ -137,7 +154,7 @@ def answer_query(say, channel, thread_ts, query):
         "messages": messages,
         "temperature": temperature,
         "top_p": top_p,
-        "max_tokens": 1000,
+        "max_tokens": max_tokens,
     }
 
     try:
