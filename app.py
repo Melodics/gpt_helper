@@ -21,6 +21,8 @@ log = logging.getLogger()
 
 chatUrl = "https://api.openai.com/v1/chat/completions"
 
+prompt_id = ""
+
 # Install the Slack app and get xoxb- token in advance
 app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing_secret=config["SLACK_SIGNING_SECRET"])
 
@@ -28,6 +30,7 @@ app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing
 @app.event("message")
 def handle_message_events(body, logger):
     logger.info(body)
+
 
 def respond_to_slack_within_3_seconds(body, ack):
     ack(f"Accepted!")
@@ -49,16 +52,19 @@ def get_image_for_message(message):
             print("Error getting image contents: {}".format(e))
     return None
 
+
 def _message_is_from_codachat(thread_message):
     return thread_message.get('app_id') ==  codachat_app_id
 
-def answer_query(say, channel, thread_ts, query):
+
+def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
     """
 
     @param say:
     @param channel:
     @param thread_ts:
     @param query:
+    @param confirm_prompt_ts:
     @return:
     """
     # Use the following values as default so that the highest probability words are selected,
@@ -66,7 +72,6 @@ def answer_query(say, channel, thread_ts, query):
     temperature = 0
     top_p = 1
     max_tokens = 1000
-
     if thread_ts:
         thread = app.client.conversations_replies(
             channel=channel,
@@ -75,16 +80,27 @@ def answer_query(say, channel, thread_ts, query):
 
         # Extract messages text
         thread_messages = []
+        print(f'DEBUG: thread is: {thread}')
         for thread_message in thread["messages"]:
             print(f'DEBUG: thread_message is {thread_message}')
+            user_id = thread_message['user']
+            print(f"DEBUG: The user id is: {user_id}")
+            user_info = app.client.users_info(user=user_id)
+            print(f'DEBUG: user_info is {user_info}')
+            display_name = user_info['user']['real_name']  # Choose from 'name', 'display_name' or 'real_name'
+            print(f'DEBUG: Display name is: {display_name}')
             actor = "assistant" if _message_is_from_codachat(thread_message) else "user"
-            message = thread_message["text"]
-            thread_messages.append((actor, message))
+            print(f'DEBUG: thread_message text is: {thread_message["text"]}')
+            message = thread_message['text']
+            thread_messages.append((actor, display_name + ": " + message))
     else:
+        print(f'DEBUG: No thread_ts found')
         thread_messages = [("user", query)]
 
-    print("thread_messages", json.dumps(thread_messages))
+    print(f"DEBUG: Thread_messages: {json.dumps(thread_messages)}")
+
     thinking_message = "Thinking..."
+
     gpt_model = "gpt-3.5-turbo"
 
     if "(be special)" in query:
@@ -111,7 +127,7 @@ def answer_query(say, channel, thread_ts, query):
         system_prompt = """
         Analyze the entire thread of conversation provided, then provide the following:
         Key "title:" - add a title.
-        Key "summary" - create a summary.
+        Key "summary" - create a summary. List and identify where a point was made by a specific person. 
         Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 10 items.
         Key "action_items:" - add an array of action items. Limit each item to 100 words, and limit the list to 5 items.
         Key "follow_up:" - add an array of follow-up questions. Limit each item to 100 words, and limit the list to 5 items.
@@ -125,20 +141,21 @@ def answer_query(say, channel, thread_ts, query):
 
     if "(summarise long)" in query:
         # Allow the maximum number of tokens in the response
-        max_tokens = 2048
+        max_tokens = 2000
 
     if "(summarise short)" in query:
         # Provide a shortened answer limiting to a summary and main points
         system_prompt = """
         Analyze the entire thread of conversation provided, then provide the following:
         Key "title:" - add a title.
-        Key "summary" - create a summary. Limit the summary to 3 sentences.
+        Key "summary" - create a summary. Limit the summary to 3 sentences. List and identify where a point was made by a specific person. 
         Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 3 items.
       
         Transcript:
         """
         max_tokens = 300
 
+    app.client.chat_delete(channel=channel, ts=confirm_prompt_ts)  # Delete the prompt confirmation dialog
     thinking_message = say(thinking_message, thread_ts=thread_ts)
 
     messages = [
@@ -177,6 +194,7 @@ def answer_query(say, channel, thread_ts, query):
 
 @app.event("app_mention")
 def handle_app_mention_events(event, say: Say):
+    print(f'DEBUG: 2')
     channel = event["channel"]
     thread_ts = event.get("thread_ts", event.get("ts"))
 
@@ -184,7 +202,7 @@ def handle_app_mention_events(event, say: Say):
         say("Sorry, CodaChat is currently in a beta and has not been enabled on this channel. Try asking on one of the currently supported channels.",
             thread_ts=thread_ts)
         return
-
+    global prompt_id
     prompt_id = say(
         channel=channel,
         text=f"Are you sure you want to proceed with asking {event['text']}",
@@ -228,12 +246,17 @@ def handle_app_mention_events(event, say: Say):
 
 @app.action("confirm_button")
 def handle_confirm_button(ack, body, logger, payload, say):
+    global prompt_id
+    print("DEBUG: Handling confirm button")
     ack()
     logger.info(body)
+    print(f'DEBUG: prompt_id is: {prompt_id}')
+    print(f'DEBUG: ts to delete is: {prompt_id["ts"]}')
     print(f'DEBUG: The body is: {body}')
     print(f'DEBUG: The payload is: {payload}')
-    app.client.chat_delete(channel=body['channel']['id'], ts=body['message']['ts'])  # Delete the prompt confirmation dialog
-    answer_query(say=say, channel=body['channel']['id'], thread_ts=body['message']['thread_ts'], query=payload['value'])
+    # app.client.chat_delete(channel=body['channel']['id'], ts=prompt_id['ts'])  # Delete the prompt confirmation dialog
+    answer_query(say=say, channel=body['channel']['id'], thread_ts=body['message']['thread_ts'], query=payload['value'],
+                 confirm_prompt_ts=prompt_id["ts"])
 
 
 @app.action("cancel_button")
