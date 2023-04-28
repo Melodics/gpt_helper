@@ -205,7 +205,6 @@ def handle_app_mention_events(event, say: Say):
     global prompt_id
     prompt_id = say(
         channel=channel,
-        text=f"Are you sure you want to proceed with asking {event['text']}",
         thread_ts=thread_ts,
         # See https://app.slack.com/block-kit-builder/ for use of blocks
         blocks=[
@@ -213,7 +212,7 @@ def handle_app_mention_events(event, say: Say):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Before I reply, please click *Yeah* to confirm the contents of this Slack thread comply with the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
+                    "text": "Heads up! Have you checked that this whole Slack thread does not contain personally identifiable information of any individuals? For more info see the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
                 }
             },
             {
@@ -223,7 +222,7 @@ def handle_app_mention_events(event, say: Say):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": f"Yeah",
+                            "text": f"Yup, all good to go!",
                         },
                         "value": f"{event['text']}",
                         "action_id": "confirm_button",
@@ -232,7 +231,7 @@ def handle_app_mention_events(event, say: Say):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Yeah, nah",
+                            "text": "Not 100% sure, I'll have another read.",
                         },
                         "value": "no",
                         "action_id": "cancel_button"
