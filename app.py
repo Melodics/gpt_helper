@@ -25,7 +25,12 @@ app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing
 def handle_message_events(body, logger):
     logger.info(body)
 
-# TODO: Should logger handle @mention events too?
+
+@app.event("app_mention")
+def handle_message_events(body, logger):
+    logger.info(body)
+
+
 def respond_to_slack_within_3_seconds(body, ack):
     ack(f"Accepted!")
 
