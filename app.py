@@ -1,4 +1,3 @@
-import os
 import json
 import requests
 import logging
@@ -9,11 +8,6 @@ from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
 # Use config_secrets_manager or config_ssm to switch between Secrets Manager or SSM
 from utils import config_secrets_manager as config
-
-# Channel IDs
-id_gpt_helper_demo = 'C054CSCDPCG'
-id_engineering_off_topic = 'C01CK9GUT2Q'
-allowlist_channel_ids = [id_gpt_helper_demo, id_engineering_off_topic]
 
 codachat_app_id = 'A053FV4TQCW'
 
@@ -31,7 +25,7 @@ app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing
 def handle_message_events(body, logger):
     logger.info(body)
 
-
+# TODO: Should logger handle @mention events too?
 def respond_to_slack_within_3_seconds(body, ack):
     ack(f"Accepted!")
 
@@ -198,10 +192,6 @@ def handle_app_mention_events(event, say: Say):
     channel = event["channel"]
     thread_ts = event.get("thread_ts", event.get("ts"))
 
-    if channel not in allowlist_channel_ids:
-        say("Sorry, CodaChat is currently in a beta and has not been enabled on this channel. Try asking on one of the currently supported channels.",
-            thread_ts=thread_ts)
-        return
     global prompt_id
     prompt_id = say(
         channel=channel,
