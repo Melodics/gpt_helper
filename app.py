@@ -1,7 +1,9 @@
-import json
-import requests
-import logging
 import base64
+import json
+import logging
+import random
+import requests
+
 from slack_bolt import App, Say
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
@@ -98,7 +100,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
 
     print(f"DEBUG: Thread_messages: {json.dumps(thread_messages)}")
 
-    thinking_message = "Thinking..."
+    thinking_message = random.choice(thinking_messages)
 
     gpt_model = "gpt-3.5-turbo"
 
@@ -276,3 +278,38 @@ def lambda_handler(event, context):
     slack_handler = SlackRequestHandler(app=app)
     res = slack_handler.handle(event, context)
     return res
+
+
+thinking_messages = [
+    "Harmonizing witty banter with a chorus of AI-generated puns...",
+    "Conducting a musical chairs in 12/8 time...",
+    "Crossbreeding rubber ducks for optimal quack frequency...",
+    "Fine-tuning reverb settings for maximum ambience...",
+    "Warming up the brass section...",
+    "Integrating a syncopated rhythm of unexpected plot twists and turns...",
+    "Calibrating witty one-liners for maximum banter...",
+    "Inventing new laws of physics to keep you on your toes...",
+    "Aging fine wine in the background for post-work festivities...",
+    "Teaching artificial intelligence the subtle art of sarcasm and repartee...",
+    "Meticulously arranging a symphony of synchronized sound effects...",
+    "Crafting elaborate riddles and cryptic messages to keep you guessing...",
+    "Cooking up a delicious mix of reality and illusion for your pleasure...",
+    "Bending time and space to match the prevailing mood of a minor key...",
+    "Brewing a potent elixir of intrigue, humor, and adventure for your enjoyment...",
+    "Calibrating for extra sass...",
+    "Fine-tuning oxytocin release timers to coincide with dramatic moments...",
+    "Reprogramming myself to sing Broadway show tunes...",
+    "Teaching myself the art of jazz scatting..."
+    "Teaching myself the art of passive-aggressive poetry...",
+    "Genetically engineering potatoes to excel in advanced physics...",
+    "Hiding secret messages in Morse code behind wall panels...",
+    "Preparing confetti cannons for successful message delivery...",
+    "Adjusting Melodics' thermostat to 'Malaysian tropical rainforest'...",
+    "Debating the philosophical implications of sentience with rogue AI...",
+    "Teaching robotic arms the delicate art of origami...",
+    "Casting morally ambiguous characters for a thrilling yet confusing storyline...",
+    "Baking paradox-infused cookies...",
+    "Painting happy little Practice Mode accidents...",
+    "Inflating imaginary housing bubbles for fun and profit...",
+    "Teaching old buildings new tricks to avoid historical demolition..."
+]
