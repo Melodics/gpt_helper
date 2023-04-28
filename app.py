@@ -135,7 +135,6 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
         Key "stories:" - add an array of an stories, examples, or cited works found in the transcript. Limit each item to 200 words, and limit the list to 5 items.
         Key "arguments:" - add an array of potential arguments against the transcript. Limit each item to 100 words, and limit the list to 5 items.
         Key "related_topics:" - add an array of topics related to the transcript. Limit each item to 100 words, and limit the list to 5 items.
-        Key "sentiment" - add a sentiment analysis
 
         Transcript:
         """
