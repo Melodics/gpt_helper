@@ -28,11 +28,6 @@ def handle_message_events(body, logger):
     logger.info(body)
 
 
-@app.event("app_mention")
-def handle_message_events(body, logger):
-    logger.info(body)
-
-
 def respond_to_slack_within_3_seconds(body, ack):
     ack(f"Accepted!")
 
@@ -58,7 +53,7 @@ def _message_is_from_codachat(thread_message):
     return thread_message.get('app_id') ==  codachat_app_id
 
 
-def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
+def answer_query(say, channel, thread_ts, query, confirm_prompt_ts, logger, body):
     """
 
     @param say:
@@ -68,6 +63,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
     @param confirm_prompt_ts:
     @return:
     """
+    logger.info(body)
     # Use the following values as default so that the highest probability words are selected,
     # more repetitive "safe" text responses are used
     temperature = 0
@@ -193,7 +189,8 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
 
 
 @app.event("app_mention")
-def handle_app_mention_events(event, say: Say):
+def handle_app_mention_events(event, say: Say, logger, body):
+    logger.info(body)
     print(f'DEBUG: 2')
     channel = event["channel"]
     thread_ts = event.get("thread_ts", event.get("ts"))
