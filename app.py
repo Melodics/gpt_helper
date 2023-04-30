@@ -84,6 +84,23 @@ greeting_messages = [
     "Wiggle waggle!"
 ]
 
+cancel_messages = [
+    "Surf's up, matey! I appreciate your sincerity!",
+    "By the salty sea, your honesty is refreshing!",
+    "Golly, your truthfulness is as bright as a starfish!",
+    "Ahoy, that's a treasure trove of honesty!",
+    "Whale, whale, whale, that's some real sincerity!",
+    "What a wave of truth you've brought, my friend!",
+    "You're the pearl of the sea with that honesty!",
+    "Barnacle blessings! Your honesty is refreshing!",
+    "Coral-ful! I appreciate your sincerity!",
+    "Sea-sparkles! You've brightened my tide!",
+    "Surf's up, friend! Thanks for being genuine!",
+    "Oh, pinch me! I must be dreaming! You're so honest!",
+    "Wave-tastic! Your truthfulness is a breath of fresh sea air!",
+    "Claw-some! Your candor is a gift!",
+    "Sandy sincerity! You're a real pearl!"
+]
 
 @app.event("message")
 def handle_message_events(body, logger):
@@ -158,7 +175,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts, logger, body
 
     print(f"DEBUG: Thread_messages: {json.dumps(thread_messages)}")
 
-    thinking_message = random.choice(thinking_messages)
+    # thinking_message = random.choice(thinking_messages)
 
     gpt_model = "gpt-3.5-turbo"
 
@@ -214,7 +231,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts, logger, body
         max_tokens = 300
 
     app.client.chat_delete(channel=channel, ts=confirm_prompt_ts)  # Delete the prompt confirmation dialog
-    thinking_message = say(thinking_message, thread_ts=thread_ts)
+    thinking_message = say(random.choice(thinking_messages), thread_ts=thread_ts)
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -317,7 +334,7 @@ def handle_confirm_button(ack, body, logger, payload, say):
 @app.action("cancel_button")
 def handle_cancel_button(ack, body, say):
     ack()
-    cancel_confirm = say("Your honesty knows no bounds 𖤣.𖥧.𖡼.⚘",  thread_ts=body['message']['thread_ts'])
+    cancel_confirm = say(random.choice(cancel_messages),  thread_ts=body['message']['thread_ts'])
     app.client.chat_delete(channel=body['channel']['id'], ts=body['message']['ts'])  # Delete the prompt confirmation dialog
     import time
     time.sleep(2)  # Allow enough time to display cancel_confirm message
