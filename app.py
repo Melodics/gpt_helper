@@ -205,7 +205,7 @@ def handle_app_mention_events(event, say: Say, logger, body):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Heads up! Have you checked that this whole Slack thread does not contain personally identifiable information of any individuals? For more info see the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
+                    "text": "Before I answer, have you checked that this particular conversation thread does not contain any information that would personally identify any individuals? For more info see the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
                 }
             },
             {
@@ -215,7 +215,7 @@ def handle_app_mention_events(event, say: Say, logger, body):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": f"Yup, all good to go!",
+                            "text": f"Yup, good to go!",
                         },
                         "value": f"{event['text']}",
                         "action_id": "confirm_button",
@@ -224,7 +224,7 @@ def handle_app_mention_events(event, say: Say, logger, body):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Not 100% sure, I'll have another read.",
+                            "text": "Not 100% sure...",
                         },
                         "value": "no",
                         "action_id": "cancel_button"
