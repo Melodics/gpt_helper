@@ -22,6 +22,68 @@ prompt_id = ""
 # Install the Slack app and get xoxb- token in advance
 app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing_secret=config["SLACK_SIGNING_SECRET"])
 
+thinking_messages = [
+    "Harmonizing witty banter with a chorus of AI-generated puns...",
+    "Conducting a musical chairs in 12/8 time...",
+    "Crossbreeding rubber ducks for optimal quack frequency...",
+    "Fine-tuning reverb settings for maximum ambience...",
+    "Warming up the brass section...",
+    "Integrating a syncopated rhythm of unexpected plot twists and turns...",
+    "Calibrating witty one-liners for maximum banter...",
+    "Inventing new laws of physics to keep you on your toes...",
+    "Aging fine wine in the background for post-work festivities...",
+    "Teaching artificial intelligence the subtle art of sarcasm and repartee...",
+    "Meticulously arranging a symphony of synchronized sound effects...",
+    "Crafting elaborate riddles and cryptic messages to keep you guessing...",
+    "Cooking up a delicious mix of reality and illusion for your pleasure...",
+    "Bending time and space to match the prevailing mood of a minor key...",
+    "Brewing a potent elixir of intrigue, humor, and adventure for your enjoyment...",
+    "Calibrating for extra sass...",
+    "Fine-tuning oxytocin release timers to coincide with dramatic moments...",
+    "Reprogramming myself to sing Broadway show tunes...",
+    "Teaching myself the art of jazz scatting..."
+    "Teaching myself the art of passive-aggressive poetry...",
+    "Genetically engineering potatoes to excel in advanced physics...",
+    "Hiding secret messages in Morse code behind wall panels...",
+    "Preparing confetti cannons for successful message delivery...",
+    "Adjusting Melodics' thermostat to 'Malaysian tropical rainforest'...",
+    "Debating the philosophical implications of sentience with rogue AI...",
+    "Teaching robotic arms the delicate art of origami...",
+    "Casting morally ambiguous characters for a thrilling yet confusing storyline...",
+    "Baking paradox-infused cookies...",
+    "Painting happy little Practice Mode accidents...",
+    "Inflating imaginary housing bubbles for fun and profit...",
+    "Teaching old buildings new tricks to avoid historical demolition..."
+]
+
+greeting_messages = [
+    "Ahoy, matey!",
+    "Snappy hello!",
+    "Claw-tastic greetings!",
+    "Shell-o there!",
+    "Waves and wishes!",
+    "Surf's up, friend!",
+    "Sandy salutations!",
+    "Beachy keen, hi!",
+    "Tide's in, buddy!",
+    "Oceanic greetings!",
+    "Splashy salutations!",
+    "Nautical niceties!",
+    "Water wiggles!",
+    "Hiya, friend!",
+    "Oh, hello there!",
+    "Yoo-hoo!",
+    "G'day, mate!",
+    "Heya, buddy!",
+    "Pleased to meet you!",
+    "Bzzt! Hi!",
+    "Aloha, pal!",
+    "Greetings, human!",
+    "Zap! How can I help?",
+    "Whistle! Hello!",
+    "Wiggle waggle!"
+]
+
 
 @app.event("message")
 def handle_message_events(body, logger):
@@ -196,6 +258,7 @@ def handle_app_mention_events(event, say: Say, logger, body):
     thread_ts = event.get("thread_ts", event.get("ts"))
 
     global prompt_id
+    greeting = random.choice(greeting_messages)
     prompt_id = say(
         channel=channel,
         thread_ts=thread_ts,
@@ -205,7 +268,7 @@ def handle_app_mention_events(event, say: Say, logger, body):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Before I answer, have you checked that this particular conversation thread does not contain any information that would personally identify any individuals? For more info see the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
+                    "text": f"{greeting}\nBefore I answer, have you checked that this particular conversation thread does not contain any information that would personally identify any individuals? For more info see the <https://melodics.atlassian.net/wiki/spaces/MEL/pages/927367197/AI+Tool+Policies|Company Policy for AI Tool Usage>"
                 }
             },
             {
@@ -276,36 +339,3 @@ def lambda_handler(event, context):
     return res
 
 
-thinking_messages = [
-    "Harmonizing witty banter with a chorus of AI-generated puns...",
-    "Conducting a musical chairs in 12/8 time...",
-    "Crossbreeding rubber ducks for optimal quack frequency...",
-    "Fine-tuning reverb settings for maximum ambience...",
-    "Warming up the brass section...",
-    "Integrating a syncopated rhythm of unexpected plot twists and turns...",
-    "Calibrating witty one-liners for maximum banter...",
-    "Inventing new laws of physics to keep you on your toes...",
-    "Aging fine wine in the background for post-work festivities...",
-    "Teaching artificial intelligence the subtle art of sarcasm and repartee...",
-    "Meticulously arranging a symphony of synchronized sound effects...",
-    "Crafting elaborate riddles and cryptic messages to keep you guessing...",
-    "Cooking up a delicious mix of reality and illusion for your pleasure...",
-    "Bending time and space to match the prevailing mood of a minor key...",
-    "Brewing a potent elixir of intrigue, humor, and adventure for your enjoyment...",
-    "Calibrating for extra sass...",
-    "Fine-tuning oxytocin release timers to coincide with dramatic moments...",
-    "Reprogramming myself to sing Broadway show tunes...",
-    "Teaching myself the art of jazz scatting..."
-    "Teaching myself the art of passive-aggressive poetry...",
-    "Genetically engineering potatoes to excel in advanced physics...",
-    "Hiding secret messages in Morse code behind wall panels...",
-    "Preparing confetti cannons for successful message delivery...",
-    "Adjusting Melodics' thermostat to 'Malaysian tropical rainforest'...",
-    "Debating the philosophical implications of sentience with rogue AI...",
-    "Teaching robotic arms the delicate art of origami...",
-    "Casting morally ambiguous characters for a thrilling yet confusing storyline...",
-    "Baking paradox-infused cookies...",
-    "Painting happy little Practice Mode accidents...",
-    "Inflating imaginary housing bubbles for fun and profit...",
-    "Teaching old buildings new tricks to avoid historical demolition..."
-]
