@@ -278,6 +278,7 @@ def handle_app_mention_events(event, say: Say, logger, body):
     greeting = random.choice(greeting_messages)
     prompt_id = say(
         channel=channel,
+        text="Before I answer...",
         thread_ts=thread_ts,
         # See https://app.slack.com/block-kit-builder/ for use of blocks
         blocks=[
