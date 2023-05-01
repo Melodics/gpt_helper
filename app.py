@@ -102,9 +102,10 @@ cancel_messages = [
     "Sandy sincerity! You're a real pearl!"
 ]
 
+
 @app.event("message")
 def handle_message_events(body, logger):
-    logger.info(body)
+    pass
 
 
 def respond_to_slack_within_3_seconds(body, ack):
@@ -132,7 +133,7 @@ def _message_is_from_codachat(thread_message):
     return thread_message.get('app_id') ==  codachat_app_id
 
 
-def answer_query(say, channel, thread_ts, query, confirm_prompt_ts, logger, body):
+def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
     """
 
     @param say:
@@ -142,7 +143,6 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts, logger, body
     @param confirm_prompt_ts:
     @return:
     """
-    logger.info(body)
     # Use the following values as default so that the highest probability words are selected,
     # more repetitive "safe" text responses are used
     temperature = 0
