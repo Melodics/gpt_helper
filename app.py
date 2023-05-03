@@ -24,7 +24,7 @@ app = App(process_before_response=True, token=config["SLACK_BOT_TOKEN"], signing
 
 thinking_messages = [
     "Harmonizing witty banter with a chorus of AI-generated puns...",
-    "Conducting a musical chairs in 12/8 time...",
+    "Conducting musical chairs in 12/8 time...",
     "Crossbreeding rubber ducks for optimal quack frequency...",
     "Fine-tuning reverb settings for maximum ambience...",
     "Warming up the brass section...",
