@@ -177,11 +177,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
 
     # thinking_message = random.choice(thinking_messages)
 
-    gpt_model = "gpt-3.5-turbo"
-
-    if "(be special)" in query:
-        thinking_message = "Thinking using GPT-4..."
-        gpt_model = "gpt-4"
+    gpt_model = "gpt-4"
 
     if "(be creative)" in query:
         thinking_message = "Thinking creatively..."
@@ -231,7 +227,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
         max_tokens = 300
 
     app.client.chat_delete(channel=channel, ts=confirm_prompt_ts)  # Delete the prompt confirmation dialog
-    thinking_message = say(random.choice(thinking_messages), thread_ts=thread_ts)
+    thinking_message = say(gpt_model + ": " + random.choice(thinking_messages), thread_ts=thread_ts)
 
     messages = [
         {"role": "system", "content": system_prompt},
