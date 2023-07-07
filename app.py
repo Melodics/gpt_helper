@@ -168,7 +168,7 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
             actor = "assistant" if _message_is_from_codachat(thread_message) else "user"
             print(f'DEBUG: thread_message text is: {thread_message["text"]}')
             message = thread_message['text']
-            thread_messages.append((actor, display_name + ": " + message))
+            thread_messages.append((actor, message))
     else:
         print(f'DEBUG: No thread_ts found')
         thread_messages = [("user", query)]
