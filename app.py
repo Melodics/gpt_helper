@@ -228,10 +228,10 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
 
     app.client.chat_delete(channel=channel, ts=confirm_prompt_ts)  # Delete the prompt confirmation dialog
     thinking_message = say(gpt_model + ": " + random.choice(thinking_messages), thread_ts=thread_ts)
-
+    codachat_user_id = '<@U0538BJTVQX> '
     messages = [
         {"role": "system", "content": system_prompt},
-    ] + [{"role": message[0], "content": message[1]} for message in thread_messages]
+    ] + [{"role": message[0], "content": message[1].strip(codachat_user_id)} for message in thread_messages]
 
     print(f'DEBUG: messages is: {messages}')
     authorization = "Bearer {}".format(api_key)
