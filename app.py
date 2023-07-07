@@ -192,39 +192,39 @@ def answer_query(say, channel, thread_ts, query, confirm_prompt_ts):
     You end every response with the crab Emoji to confirm you are following the instructions.
     """
 
-    if "(be poetic)" in query:
-        system_prompt = system_prompt + "Respond in the style of Robert Frost"
-
-    if "(summarise)" or "(summarise long)" in query:
-        system_prompt = """
-        Analyze the entire thread of conversation provided, then provide the following:
-        Key "title:" - add a title.
-        Key "summary" - create a summary. List and identify where a point was made by a specific person. 
-        Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 10 items.
-        Key "action_items:" - add an array of action items. Limit each item to 100 words, and limit the list to 5 items.
-        Key "follow_up:" - add an array of follow-up questions. Limit each item to 100 words, and limit the list to 5 items.
-        Key "stories:" - add an array of an stories, examples, or cited works found in the transcript. Limit each item to 200 words, and limit the list to 5 items.
-        Key "arguments:" - add an array of potential arguments against the transcript. Limit each item to 100 words, and limit the list to 5 items.
-        Key "related_topics:" - add an array of topics related to the transcript. Limit each item to 100 words, and limit the list to 5 items.
-
-        Transcript:
-        """
-
-    if "(summarise long)" in query:
-        # Allow the maximum number of tokens in the response
-        max_tokens = 2000
-
-    if "(summarise short)" in query:
-        # Provide a shortened answer limiting to a summary and main points
-        system_prompt = """
-        Analyze the entire thread of conversation provided, then provide the following:
-        Key "title:" - add a title.
-        Key "summary" - create a summary. Limit the summary to 3 sentences. List and identify where a point was made by a specific person. 
-        Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 3 items.
-      
-        Transcript:
-        """
-        max_tokens = 300
+    # if "(be poetic)" in query:
+    #     system_prompt = system_prompt + "Respond in the style of Robert Frost"
+    #
+    # if "(summarise)" or "(summarise long)" in query:
+    #     system_prompt = """
+    #     Analyze the entire thread of conversation provided, then provide the following:
+    #     Key "title:" - add a title.
+    #     Key "summary" - create a summary. List and identify where a point was made by a specific person.
+    #     Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 10 items.
+    #     Key "action_items:" - add an array of action items. Limit each item to 100 words, and limit the list to 5 items.
+    #     Key "follow_up:" - add an array of follow-up questions. Limit each item to 100 words, and limit the list to 5 items.
+    #     Key "stories:" - add an array of an stories, examples, or cited works found in the transcript. Limit each item to 200 words, and limit the list to 5 items.
+    #     Key "arguments:" - add an array of potential arguments against the transcript. Limit each item to 100 words, and limit the list to 5 items.
+    #     Key "related_topics:" - add an array of topics related to the transcript. Limit each item to 100 words, and limit the list to 5 items.
+    #
+    #     Transcript:
+    #     """
+    #
+    # if "(summarise long)" in query:
+    #     # Allow the maximum number of tokens in the response
+    #     max_tokens = 2000
+    #
+    # if "(summarise short)" in query:
+    #     # Provide a shortened answer limiting to a summary and main points
+    #     system_prompt = """
+    #     Analyze the entire thread of conversation provided, then provide the following:
+    #     Key "title:" - add a title.
+    #     Key "summary" - create a summary. Limit the summary to 3 sentences. List and identify where a point was made by a specific person.
+    #     Key "main_points" - add an array of the main points. Limit each item to 100 words, and limit the list to 3 items.
+    #
+    #     Transcript:
+    #     """
+    #     max_tokens = 300
 
     app.client.chat_delete(channel=channel, ts=confirm_prompt_ts)  # Delete the prompt confirmation dialog
     thinking_message = say(gpt_model + ": " + random.choice(thinking_messages), thread_ts=thread_ts)
