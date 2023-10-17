@@ -48,5 +48,5 @@ The bot is also available under 'Apps' where it is not necessary to mention `@GP
 
 This will use the GPT3.5 model.
 
-## GPT4
-If your OpenAI key allows access to GPT4 it is possible to invoke this model by including `(be special)` in the message. For example `@GPTHelper (be special) what is 2+2?` will invoke GPT4
+## Secrets
+Secrets for the app are stored in AWS Secrets Manager, as defined in https://github.com/Melodics/gpt_helper/blob/main/utils/ssm.py
